@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webview Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="../node_modules/androidjs/lib/androidjs.js"></script>
+    <style>
+        .app {
+            font-size: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <p>School: </p>
+    <input id="school" size="20" /><br />
+    <p>Gebruikersnaam: </p>
+    <input id="gebruikersnaam" size="20" /><br />
+    <p>Wachtwoord: </p>
+    <input id="wachtwoord" size="20" type="password" /><br />
+    <p>Leerjaar: </p>
+    <input id="leerjaar" size="5" type="number" /><br />
+    <p>Cijfer: </p>
+    <input id="cijfer" size="5" step=".1" type="number" /><br />
+    <p>Weging: </p>
+    <input id="weging" size="5" type="number" /><br />
+    <p>Vak afkorting: </p>
+    <input id="vak" size="20" /><br />
+    <button onclick="submit()">submit</button><br />
+    <button onclick="load()">Load User Data</button><br />
+    <button onclick="deleteUserData()">Delete my data from my smartphone.</button>
+    <p id="output"></p>
+
+    <script type="text/javascript" src="../assets/script.js"></script>
+    <script src="../assets/jquery-3.3.1.slim.min.js"></script>
+    <script src="../assets/popper.min.js"></script>
+    <script src="../assets/bootstrap.min.js"></script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+
+        .container {
+            padding: 0px;
+        }
+
+        .display-3 {
+            font-size: 2.0rem;
+        }
+
+        .jumbotron {
+            background: #fff;
+        }
+    </style>
+    <script type="text/javascript">
+        function toggle_popover() {
+            $('#popover').popover('toggle')
+        }
+        function submit() {
+            var school = document.getElementById("school").value;
+            var gebruikersnaam = document.getElementById("gebruikersnaam").value;
+            var wachtwoord = document.getElementById("wachtwoord").value;
+            var leerjaar = document.getElementById("leerjaar").value;
+            var cijfer = document.getElementById("cijfer").value;
+            var weging = document.getElementById("weging").value;
+            var vak = document.getElementById("vak").value;
+            front.send("input", gebruikersnaam, wachtwoord, cijfer, weging, vak, leerjaar, school, app.getPath("appData"));
+            $('#output').html("Laden")
+        }
+
+        front.on("output", function (cijferTeBehalen) {
+            console.log(cijferTeBehalen);
+            var vak = document.getElementById("vak").value;
+            var cijfer = document.getElementById("cijfer").value
+            $('#output').html("Je moet een " + cijferTeBehalen + " halen om een " + cijfer + " te staan voor " + vak);
+        });
+        front.on("error", function (error) {
+            console.log(cijferTeBehalen);
+            $('#output').html(error);
+        });
+        front.on("school", function (cijferTeBehalen) {
+            console.log(cijferTeBehalen);
+            document.getElementById("school").value = cijferTeBehalen;
+        });
+    </script>
+
+    <script type="text/javascript">
+        async function deleteUserData() {
+            var appData = await app.getPath("appData")
+            front.send("delete", appData)
+        }
+        async function load() {
+
+            var appData = await app.getPath("appData")
+            front.send("load", appData)
+        }
+        front.on("boot up", function (data) {
+            if (data == null) {
+                
+                $('#output').html("There isn't any data stored");
+            }
+            else {
+                var res = data.split("\n");
+                document.getElementById("school").value = res[3]
+                document.getElementById("gebruikersnaam").value = res[0]
+                document.getElementById("wachtwoord").value = res[1]
+                document.getElementById("leerjaar").value = res[2]
+                $('#output').html("Done");
+            }
+        })
+        front.on("deleted", function () {
+
+            $('#output').html("All the userData is deleted.");
+
+        })
+    </script>
+</body>
+</html>
